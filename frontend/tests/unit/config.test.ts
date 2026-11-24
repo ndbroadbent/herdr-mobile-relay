@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   importQuickSetup,
+  iosStandalone,
   isIosBrowserTab,
   loadRelayConfigs,
   normalizeRelayConfig,
@@ -29,6 +30,20 @@ describe('Home Screen setup handoff', () => {
     [false, 'Android', 5, false],
   ])('detects tabs with standalone=%s, device=%s and touch points=%s', (standalone, device, touchPoints, expected) => {
     expect(isIosBrowserTab(standalone, `Mozilla/5.0 (${device})`, touchPoints)).toBe(expected);
+  });
+
+  it.each([
+    [false, true, true],
+    [undefined, true, true],
+    [true, false, true],
+    [false, false, false],
+    [undefined, false, undefined],
+  ])('treats the standalone display mode as installed (navigator.standalone=%s, display mode standalone=%s)', (navigatorStandalone, displayMode, expected) => {
+    expect(iosStandalone(navigatorStandalone, displayMode)).toBe(expected);
+  });
+
+  it('shows a Home Screen app that reports navigator.standalone=false as installed', () => {
+    expect(isIosBrowserTab(iosStandalone(false, true), 'Mozilla/5.0 (iPhone)', 0)).toBe(false);
   });
 
   it('retains a valid setup fragment only in an iOS browser tab', () => {

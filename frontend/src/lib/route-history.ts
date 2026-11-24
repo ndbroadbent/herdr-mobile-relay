@@ -1,4 +1,4 @@
-import { shouldRetainSetupFragment } from './config';
+import { currentIosStandalone, shouldRetainSetupFragment } from './config';
 import { stateFromLocation, type ViewState } from './router';
 
 export type HistoryViewState = ViewState & {
@@ -19,7 +19,7 @@ export function listenViewHistory(show: (state: ViewState, index?: number) => vo
   };
   const onHashChange = () => {
     const state = history.state as HistoryViewState | null;
-    show(state?.herdrView && shouldRetainSetupFragment(location, navigator.standalone) ? state : stateFromLocation());
+    show(state?.herdrView && shouldRetainSetupFragment(location, currentIosStandalone()) ? state : stateFromLocation());
   };
   const listeners = new AbortController();
   const options = { signal: listeners.signal };

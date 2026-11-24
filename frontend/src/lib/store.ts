@@ -17,6 +17,7 @@ import {
 } from './attachments';
 import {
   canInviteFrom,
+  currentIosStandalone,
   importQuickSetup,
   loadRelayConfigs,
   MAX_PANE_SIZE_COLUMNS,
@@ -318,7 +319,7 @@ class RelayStore {
         }
       }
       saveRelayConfigs(relays);
-      if (pairingAccepted || !shouldRetainSetupFragment(location, navigator.standalone)) {
+      if (pairingAccepted || !shouldRetainSetupFragment(location, currentIosStandalone())) {
         history.replaceState(history.state, '', location.pathname + location.search);
       }
     }
@@ -329,7 +330,7 @@ class RelayStore {
   private shouldDeferPairing(locationValue: Pick<Location, 'hash' | 'protocol' | 'host'>, pairingAccepted: boolean): boolean {
     return !pairingAccepted && shouldDeferPairingConnection(
       locationValue,
-      navigator.standalone,
+      currentIosStandalone(),
       navigator.userAgent,
       navigator.maxTouchPoints,
     );
@@ -449,7 +450,7 @@ class RelayStore {
     clearChangedRelayPreviews(currentRelays, imported);
     this.applyPairingDeferral(relay, locationValue, deferred);
     this.relayConfigs.set(imported);
-    if (clearAddress && (pairingAccepted || !shouldRetainSetupFragment(locationValue, navigator.standalone))) {
+    if (clearAddress && (pairingAccepted || !shouldRetainSetupFragment(locationValue, currentIosStandalone()))) {
       history.replaceState(history.state, '', (locationValue.pathname ?? location.pathname) + (locationValue.search ?? location.search));
     }
     if (connect && !preserveConnection) this.connectAll(true);

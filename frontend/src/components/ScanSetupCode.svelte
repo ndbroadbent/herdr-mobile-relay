@@ -14,7 +14,7 @@
 
 <script lang="ts">
   import { onDestroy, tick } from 'svelte';
-  import { isIosBrowserTab } from '$lib/config';
+  import { currentIosStandalone, isIosBrowserTab } from '$lib/config';
   import { securityState } from '$lib/security';
   import { relayStore } from '$lib/store';
   import { AppReloadHeld, importOrReload } from '$lib/updates';
@@ -55,7 +55,7 @@
 <svelte:document onvisibilitychange={visibilityChanged} />
 <svelte:window onpagehide={cancel} />
 
-{#if !isIosBrowserTab(navigator.standalone, navigator.userAgent, navigator.maxTouchPoints)}
+{#if !isIosBrowserTab(currentIosStandalone(), navigator.userAgent, navigator.maxTouchPoints)}
   <button type="button" class="button button-secondary" onclick={scan}>Scan QR Code</button>
   {#if request && Scanner}<Scanner bind:open={() => Boolean(request), setOpen} />{/if}
 {/if}

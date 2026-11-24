@@ -295,6 +295,27 @@ export function quickSetupConfig(locationValue: Pick<Location, 'hash' | 'protoco
   return { label, url, token: invitation ? '' : token };
 }
 
+/**
+ * Whether this page runs as an iOS Home Screen app, as `navigator.standalone`
+ * reports it: true, false (a Safari tab) or undefined (not iOS Safari). Some
+ * iOS versions report false inside a Home Screen app opened as a web app,
+ * which would hide the scanner and defer pairing forever, so the
+ * standalone display mode counts as installed too.
+ */
+export function iosStandalone(
+  navigatorStandalone: boolean | undefined,
+  displayModeStandalone: boolean,
+): boolean | undefined {
+  return displayModeStandalone || navigatorStandalone;
+}
+
+export function currentIosStandalone(): boolean | undefined {
+  return iosStandalone(
+    navigator.standalone,
+    Boolean(window.matchMedia?.('(display-mode: standalone)').matches),
+  );
+}
+
 export function shouldRetainSetupFragment(
   locationValue: Pick<Location, 'hash' | 'protocol' | 'host'>,
   standalone: boolean | undefined,

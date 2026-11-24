@@ -33,6 +33,9 @@ project follows [Semantic Versioning](https://semver.org/).
 
 - When the Herdr TUI is stopped, the phone now tells you to start it with
   `herdr` instead of showing a generic inventory error.
+- The Home Screen app on iPhone and iPad shows Scan QR Code again, and opens
+  setup links itself, on iOS versions that report an installed web app to the
+  page as a Safari tab.
 
 ## [0.26.1] - 2026-11-19
 

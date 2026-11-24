@@ -1,5 +1,5 @@
 import { get, writable, type Readable } from 'svelte/store';
-import { shouldDeferPairingConnection, shouldRetainSetupFragment } from './config';
+import { currentIosStandalone, shouldDeferPairingConnection, shouldRetainSetupFragment } from './config';
 import { agentKind, clientPaneId } from './agents';
 import { parseNotificationTarget } from './protocol';
 import { decodeTargetRoute, encodeTargetRoute, targetRefForAgent, targetRefMatchesAgent } from './resource-id';
@@ -129,7 +129,7 @@ export function viewUrl(state: ViewState): string {
 }
 
 function navigationUrl(state: ViewState): string | undefined {
-  if (shouldDeferPairingConnection(location, navigator.standalone, navigator.userAgent, navigator.maxTouchPoints)) return;
+  if (shouldDeferPairingConnection(location, currentIosStandalone(), navigator.userAgent, navigator.maxTouchPoints)) return;
   return viewUrl(state);
 }
 
@@ -178,7 +178,7 @@ export function closeCurrentView(): void {
 }
 
 export function initializeRouter(): () => void {
-  const setupUrl = shouldRetainSetupFragment(location, navigator.standalone)
+  const setupUrl = shouldRetainSetupFragment(location, currentIosStandalone())
     ? location.href : '';
   const initial = stateFromLocation();
   replaceView({ view: 'agents' });
