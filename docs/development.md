@@ -152,6 +152,14 @@ retiring the previous definition. A temporary public failure fails this install
 attempt; it does not create a permanent runtime network-health requirement.
 Gateway mode does not require a Cloudflare URL.
 
+A restarted relay reads every agent's history before its inventory is ready,
+which can take longer than the usual 15 seconds with many long-running agents.
+While `/readyz` reports the expected relay with inventory state `starting`,
+setup keeps waiting, for up to `HERDR_RELAY_STARTUP_SECONDS` in all (default
+180). A relay that fails, never answers, or turns out to be another relay is
+still rolled back after 15 seconds. `verify-readiness` exits 3 for a starting
+relay.
+
 If rollback cannot be confirmed, its private recovery directory remains under
 `$XDG_STATE_HOME/herdr-mobile-relay/recovery` (default
 `~/.local/state/herdr-mobile-relay/recovery`). The `state` file identifies the

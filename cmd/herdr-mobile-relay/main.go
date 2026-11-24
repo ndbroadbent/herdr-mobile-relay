@@ -97,7 +97,12 @@ func run(args []string) (int, error) {
 		if len(args) != 4 {
 			return 2, errors.New("usage: herdr-mobile-relay verify-readiness INSTANCE VERSION REVISION WEB_HASH")
 		}
-		return status(readiness.Verify(os.Stdin, readiness.Expected{Instance: args[0], Version: args[1], Revision: args[2], WebHash: args[3]}))
+		err := readiness.Verify(os.Stdin, readiness.Expected{Instance: args[0], Version: args[1], Revision: args[2], WebHash: args[3]})
+		if errors.Is(err, readiness.ErrStarting) {
+			// Setup's health wait reads 3 as "still starting, keep waiting".
+			return 3, err
+		}
+		return status(err)
 	case "verify-public":
 		verifyFlags := flag.NewFlagSet("verify-public", flag.ContinueOnError)
 		verifyFlags.SetOutput(os.Stderr)

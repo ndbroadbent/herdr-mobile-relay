@@ -109,7 +109,7 @@ if ! "$SCRIPT_DIR/service.sh" install; then
     echo "✗ Background service failed." >&2
     exit 1
 fi
-if ! wait_for_relay_health "$PORT" 15 1 "$(env_file_value "$ENV_FILE" HERDR_RELAY_INSTANCE_ID)"; then
+if ! wait_for_relay_startup "$PORT" "$(env_file_value "$ENV_FILE" HERDR_RELAY_INSTANCE_ID)"; then
     echo "✗ The background relay did not become healthy. Check service logs." >&2
     exit 1
 fi

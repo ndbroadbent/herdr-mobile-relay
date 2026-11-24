@@ -11,6 +11,11 @@ import (
 
 type Expected struct{ Instance, Version, Revision, WebHash string }
 
+// ErrStarting reports the expected relay answering while its first inventory
+// is still being read. Setup keeps waiting for it instead of rolling back a
+// healthy relay whose agents have long histories.
+var ErrStarting = errors.New("relay inventory is still starting")
+
 func Verify(reader io.Reader, expected Expected) error {
 	if expected.Instance == "" {
 		return errors.New("expected relay instance is required")
@@ -27,17 +32,23 @@ func Verify(reader io.Reader, expected Expected) error {
 	if !ok {
 		return errors.New("readiness response is not an object")
 	}
-	inventory, _ := response["inventory"].(map[string]any)
-	if response["status"] != "ready" || inventory["state"] != "ready" || response["protocol"] != float64(protocol.Version) {
-		return errors.New("relay inventory is not ready")
-	}
 	for key, want := range map[string]string{"instance": expected.Instance, "release_version": expected.Version, "revision": expected.Revision, "bundle_hash": expected.WebHash} {
 		actual, ok := response[key].(string)
 		if !ok || actual == "" || (want != "" && actual != want) {
 			return fmt.Errorf("readiness %s does not match", key)
 		}
 	}
-	return nil
+	inventory, _ := response["inventory"].(map[string]any)
+	if response["protocol"] != float64(protocol.Version) {
+		return errors.New("relay inventory is not ready")
+	}
+	if response["status"] == "ready" && inventory["state"] == "ready" {
+		return nil
+	}
+	if response["status"] == "unavailable" && inventory["state"] == "starting" {
+		return ErrStarting
+	}
+	return errors.New("relay inventory is not ready")
 }
 
 func uniqueValue(decoder *json.Decoder, depth int) (any, error) {

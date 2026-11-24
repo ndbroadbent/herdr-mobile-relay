@@ -49,6 +49,16 @@ READY_RESPONSE="$(ready_json test dev unknown manifest-web)"
 : > "$READY_CURL_LOG"
 curl() {
     printf '%s\n' "$*" >> "$READY_CURL_LOG"
+    if [ "$READY_CURL_MODE" = starting ]; then
+        local attempt=0
+        [ ! -f "$READY_ATTEMPTS" ] || attempt="$(<"$READY_ATTEMPTS")"
+        attempt=$((attempt + 1))
+        printf '%s\n' "$attempt" > "$READY_ATTEMPTS"
+        if [ "$attempt" -le "$READY_STARTING_POLLS" ]; then
+            printf '%s\n' "$READY_STARTING_RESPONSE"
+            return
+        fi
+    fi
     if [ "$READY_CURL_MODE" = retry ]; then
         local attempt=0
         [ ! -f "$READY_ATTEMPTS" ] || attempt="$(<"$READY_ATTEMPTS")"
@@ -67,7 +77,7 @@ unset HERDR_RELEASE_ROOT HERDR_WEB_ROOT
 READY_OUTPUT="$(wait_for_relay_health 8375 1 0 test)"
 test "$READY_OUTPUT" = "$READY_RESPONSE"
 test "$(cat "$READY_CURL_LOG")" = \
-    '-fsS --max-time 2 http://127.0.0.1:8375/readyz'
+    '-sS --max-time 2 http://127.0.0.1:8375/readyz'
 
 # HERDR_WEB_ROOT and a descriptor's tempting bundle_hash must not replace the
 # release manifest's identity.
@@ -121,6 +131,59 @@ READY_OUTPUT="$(wait_for_relay_health 8375 3 0 test)"
 test "$READY_OUTPUT" = "$READY_RESPONSE"
 test "$(cat "$READY_ATTEMPTS")" = 2
 test "$(wc -l < "$READY_CURL_LOG" | tr -d ' ')" = 2
+READY_CURL_MODE=static
+
+# Setup's wait keeps polling a relay that answers that its first inventory is
+# still being read, beyond the usual 15 polls, and returns once it is ready.
+sleep() { :; }
+READY_STARTING_RESPONSE="$(ready_json test dev unknown manifest-web starting)"
+READY_STARTING_RESPONSE=${READY_STARTING_RESPONSE/'"status":"ready"'/'"status":"unavailable"'}
+READY_RESPONSE="$(ready_json test dev unknown manifest-web)"
+READY_CURL_MODE=starting
+READY_STARTING_POLLS=20
+rm -f "$READY_ATTEMPTS"
+READY_OUTPUT="$(wait_for_relay_startup 8375 test 2>"$WORK_DIR/startup.err")"
+test "$READY_OUTPUT" = "$READY_RESPONSE"
+test "$(cat "$READY_ATTEMPTS")" = 21
+grep -q 'still reading agent histories' "$WORK_DIR/startup.err"
+
+# It gives up at HERDR_RELAY_STARTUP_SECONDS.
+READY_STARTING_POLLS=1000
+rm -f "$READY_ATTEMPTS"
+if HERDR_RELAY_STARTUP_SECONDS=30 wait_for_relay_startup 8375 test >/dev/null 2>&1; then
+    echo "setup waited past HERDR_RELAY_STARTUP_SECONDS" >&2
+    exit 1
+fi
+test "$(cat "$READY_ATTEMPTS")" = 30
+if HERDR_RELAY_STARTUP_SECONDS=soon wait_for_relay_startup 8375 test >/dev/null 2>&1; then
+    echo "setup accepted a non-numeric HERDR_RELAY_STARTUP_SECONDS" >&2
+    exit 1
+fi
+
+# Only a starting relay earns the extra time: one whose inventory failed, or
+# another relay on the port, is given up on after the usual 15 polls.
+for unready in \
+    "${READY_STARTING_RESPONSE/'"state":"starting"'/'"state":"error"'}" \
+    "${READY_STARTING_RESPONSE/'"instance":"test"'/'"instance":"other"'}"; do
+    READY_STARTING_RESPONSE_SAVED="$READY_STARTING_RESPONSE"
+    READY_STARTING_RESPONSE="$unready"
+    rm -f "$READY_ATTEMPTS"
+    if wait_for_relay_startup 8375 test >/dev/null 2>&1; then
+        echo "setup accepted an unready relay: $unready" >&2
+        exit 1
+    fi
+    test "$(cat "$READY_ATTEMPTS")" = 15
+    READY_STARTING_RESPONSE="$READY_STARTING_RESPONSE_SAVED"
+done
+
+# Other callers keep their strict budget even while the relay is starting.
+rm -f "$READY_ATTEMPTS"
+if wait_for_relay_health 8375 1 0 test >/dev/null 2>&1; then
+    echo "a single readiness probe accepted a starting relay" >&2
+    exit 1
+fi
+test "$(cat "$READY_ATTEMPTS")" = 1
+unset -f sleep
 READY_CURL_MODE=static
 
 # Missing, unreadable/non-file, and empty manifests fail before any HTTP poll

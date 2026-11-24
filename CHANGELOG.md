@@ -33,6 +33,10 @@ project follows [Semantic Versioning](https://semver.org/).
 
 - When the Herdr TUI is stopped, the phone now tells you to start it with
   `herdr` instead of showing a generic inventory error.
+- Setup no longer rolls back a healthy relay whose first inventory takes
+  longer than 15 seconds. It keeps waiting while the relay reports it is still
+  reading agent histories, for up to `HERDR_RELAY_STARTUP_SECONDS` (default
+  180).
 
 ## [0.26.1] - 2026-11-19
 
