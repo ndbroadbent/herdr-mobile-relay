@@ -33,6 +33,9 @@ project follows [Semantic Versioning](https://semver.org/).
 
 - When the Herdr TUI is stopped, the phone now tells you to start it with
   `herdr` instead of showing a generic inventory error.
+- Tailscale setup works when the `tailscale` command is a different release
+  from the running Tailscale app or daemon. Its version warning no longer
+  breaks setup with `invalid tailscale status --json`.
 
 ## [0.26.1] - 2026-11-19
 

@@ -94,14 +94,21 @@ func (c client) output(args ...string) ([]byte, error) {
 	cmd := exec.CommandContext(ctx, c.binary, args...)
 	cmd.Env = c.env
 	cmd.WaitDelay = time.Second
-	output, err := cmd.CombinedOutput()
+	// The answer is stdout alone. The CLI warns on stderr, for example when it
+	// is a different release from the running daemon ("Warning: client
+	// version ... != tailscaled server version ..."), and that line would
+	// otherwise break the JSON. Errors still show both.
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
 	if ctx.Err() != nil {
 		return nil, fmt.Errorf("tailscale %s timed out: %w", strings.Join(args, " "), ctx.Err())
 	}
 	if err != nil {
-		return nil, cliError(strings.Join(args, " "), output, err)
+		return nil, cliError(strings.Join(args, " "), bytes.Join([][]byte{stderr.Bytes(), stdout.Bytes()}, nil), err)
 	}
-	return output, nil
+	return stdout.Bytes(), nil
 }
 
 func cliError(action string, output []byte, err error) error {

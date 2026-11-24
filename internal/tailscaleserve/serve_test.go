@@ -13,6 +13,7 @@ import (
 
 const fakeCLI = `#!/bin/sh
 printf '%s|%s\n' "$TAILSCALE_BE_CLI" "$*" >> "$TS_LOG"
+if [ -n "${TS_WARN:-}" ]; then printf '%s\n' "$TS_WARN" >&2; fi
 case "$*" in
   version)
     if [ "$TS_FAIL" = hang ]; then while :; do /bin/sleep 0.1; done; fi
@@ -177,6 +178,22 @@ func TestFailures(t *testing.T) {
 	}
 	if code, message, _ := invoke("check"); code != Missing || !strings.Contains(message, "not installed") {
 		t.Fatalf("missing CLI: %d %s", code, message)
+	}
+}
+
+func TestToleratesWarningsOnStderr(t *testing.T) {
+	setup(t)
+	t.Setenv("TS_WARN", `Warning: client version "1.104.2-t1" != tailscaled server version "1.104.6-t2"`)
+	var out, diagnostics bytes.Buffer
+	if code, err := Run([]string{"address", "--port", "8443"}, &out, &diagnostics); code != 0 || err != nil || out.String() != "https://node.tail.ts.net:8443\n" {
+		t.Fatalf("address with a version warning: %d %v %q %q", code, err, out.String(), diagnostics.String())
+	}
+	if code, message, _ := invoke("serve", "--bg"); code != 0 {
+		t.Fatalf("serve with a version warning: %d %s", code, message)
+	}
+	t.Setenv("TS_FAIL", "status")
+	if code, message, _ := invoke("check"); code != Stopped || !strings.Contains(message, "not logged in") {
+		t.Fatalf("a failing command still reports its stderr: %d %s", code, message)
 	}
 }
 
