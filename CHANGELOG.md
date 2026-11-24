@@ -5,6 +5,8 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-11-23
+
 ### Added
 
 - Use Home, End, Page Up and Page Down from the phone's Arrow keys menu to
@@ -33,6 +35,10 @@ project follows [Semantic Versioning](https://semver.org/).
 - Tap an approval or question notification for up to 48 hours, as long as the
   original request is still current. The tap opens the agent without approving
   or replying.
+- Tapping a terminal key briefly flashes it instead of showing a status line
+  that pushed the terminal up and back down. Armed modifiers stay highlighted,
+  screen readers still announce each key, and a failed send still shows a
+  notification.
 
 ### Fixed
 
@@ -2136,7 +2142,8 @@ Version 0.22.5 was withdrawn; this release skips its version and asset generatio
 - Release pane-size leases when their WebSocket owner disappears, preventing a
   laptop terminal from remaining narrowed.
 
-[Unreleased]: https://github.com/0cv/herdr-mobile-relay/compare/v0.26.1...HEAD
+[Unreleased]: https://github.com/0cv/herdr-mobile-relay/compare/v0.27.0...HEAD
+[0.27.0]: https://github.com/0cv/herdr-mobile-relay/compare/v0.26.1...v0.27.0
 [0.26.1]: https://github.com/0cv/herdr-mobile-relay/compare/v0.26.0...v0.26.1
 [0.26.0]: https://github.com/0cv/herdr-mobile-relay/compare/v0.25.1...v0.26.0
 [0.25.1]: https://github.com/0cv/herdr-mobile-relay/compare/v0.25.0...v0.25.1
