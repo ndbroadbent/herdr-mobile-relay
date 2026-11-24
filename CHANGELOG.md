@@ -33,6 +33,9 @@ project follows [Semantic Versioning](https://semver.org/).
 
 - When the Herdr TUI is stopped, the phone now tells you to start it with
   `herdr` instead of showing a generic inventory error.
+- The relay exits when it is stopped during its first inventory. A second
+  stop signal ends it at once, and otherwise it exits within 20 seconds,
+  instead of running on, busy, after its service was stopped or rolled back.
 
 ## [0.26.1] - 2026-11-19
 

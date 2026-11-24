@@ -361,6 +361,12 @@ func runServe() (int, error) {
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
+	served := make(chan struct{})
+	defer close(served)
+	go enforceShutdown(ctx, served, stop, shutdownDeadline, func() {
+		logger.Error("shutdown did not finish in time; exiting", "deadline", shutdownDeadline)
+		os.Exit(1)
+	})
 
 	if err := launchd.SweepWorkers(ctx); err != nil {
 		logger.Warn("remove finished worker jobs", "error", err)
