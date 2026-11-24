@@ -337,6 +337,7 @@ textarea { min-height: 6.5rem; resize: vertical; }
 .agent-list .compact-agent-card .agent-open { gap: .75rem; padding: .7rem .85rem; }
 .agent-list .compact-agent-card .agent-project { font-size: .9rem; font-weight: 600; }
 .agent-list .compact-agent-card .agent-meta { font-size: .74rem; margin-top: .14rem; }
+.agent-list .workspace-worktree-card .workspace-tabs { padding: 0; }
 .agent-list .workspace-worktree-card .compact-agent-card .agent-open { padding-inline: 0; }
 @media (max-width: 679px) {
   .agent-list .compact-agent-card .agent-open { padding: .85rem .9rem; }
