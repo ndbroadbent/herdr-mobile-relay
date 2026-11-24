@@ -46,6 +46,9 @@ project follows [Semantic Versioning](https://semver.org/).
 - Tailscale setup works when the `tailscale` command is a different release
   from the running Tailscale app or daemon. Its version warning no longer
   breaks setup with `invalid tailscale status --json`.
+- The relay exits when it is stopped during its first inventory. A second
+  stop signal ends it at once, and otherwise it exits within 20 seconds,
+  instead of running on, busy, after its service was stopped or rolled back.
 
 ## [0.26.1] - 2026-11-19
 
