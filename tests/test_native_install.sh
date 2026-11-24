@@ -153,6 +153,9 @@ EOF
             if [ "$failure" != none ]; then echo "$platform accepted $failure failure" >&2; exit 1; fi
             test -n "$(sed -n 's/^HERDR_RELAY_INSTANCE_ID=//p' "$HERDR_RELAY_ENV")"
             grep -F herdr-mobile-relay-service.sh "$definition" >/dev/null
+            if [ "$platform" = launchd ]; then
+                tr -d ' \n' < "$definition" | grep -F '<key>ProcessType</key><string>Interactive</string>' >/dev/null
+            fi
             ! grep -Fx 'previous definition' "$definition" >/dev/null
         else
             if [ "$failure" = none ]; then cat "$CASE/output" >&2; exit 1; fi

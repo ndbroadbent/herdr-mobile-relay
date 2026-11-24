@@ -36,6 +36,9 @@ project follows [Semantic Versioning](https://semver.org/).
 - The Home Screen app on iPhone and iPad shows Scan QR Code again, and opens
   setup links itself, on iOS versions that report an installed web app to the
   page as a Safari tab.
+- On macOS, the relay's LaunchAgent runs as an interactive process, so launchd
+  no longer throttles it and the first inventory of a large agent history
+  finishes. Run setup again to rewrite the LaunchAgent.
 
 ## [0.26.1] - 2026-11-19
 

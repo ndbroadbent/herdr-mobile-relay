@@ -67,6 +67,11 @@ cat > "$STAGED_PLIST" <<EOF
     </dict>
     <key>ThrottleInterval</key>
     <integer>10</integer>
+    <!-- Without a ProcessType, launchd applies background resource limits, and the
+         first inventory of a large agent history never finishes. The relay answers
+         a phone interactively. -->
+    <key>ProcessType</key>
+    <string>Interactive</string>
     <key>WorkingDirectory</key>
     <string>$(plist_text "$WORK_DIR")</string>
     <key>EnvironmentVariables</key>
