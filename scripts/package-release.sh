@@ -51,7 +51,8 @@ CGO_ENABLED=0 go build \
     -o "$WORK_DIR/release-tool" \
     "$REPO_DIR/cmd/herdr-mobile-relay"
 
-for TARGET in linux/amd64 linux/arm64 darwin/amd64 darwin/arm64; do
+# HERDR_RELEASE_TARGETS narrows the build, for scripts/deploy-local.sh.
+for TARGET in ${HERDR_RELEASE_TARGETS:-linux/amd64 linux/arm64 darwin/amd64 darwin/arm64}; do
     GOOS=${TARGET%/*}
     GOARCH=${TARGET#*/}
     ARCHIVE="herdr-mobile-relay_${VERSION}_${GOOS}_${GOARCH}.tar.gz"
