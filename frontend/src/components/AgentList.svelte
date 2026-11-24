@@ -2,7 +2,7 @@
   import { createReorderHold } from '$lib/reorder-hold';
   import { createReorderDrag, measureReorderSlots } from '$lib/reorder-drag.svelte';
   import { onMount } from 'svelte';
-  import AgentLogo, { agentDisplayName, hasAgentLogo } from '$components/AgentLogo.svelte';
+  import { agentDisplayName } from '$components/AgentLogo.svelte';
   import PairDeferredRelay from '$components/PairDeferredRelay.svelte';
   import ScanSetupCode from '$components/ScanSetupCode.svelte';
   import Button from '$components/ui/Button.svelte';
@@ -329,14 +329,20 @@
     await relayStore.respond(agent, index, total, option);
   }
 
+  // The second line of a row: the tab (outside a workspace card, where the
+  // title is the project), which agent runs there, and its session title.
   function agentMeta(agent: Agent, compact: boolean): string {
     const tab = compact ? '' : tabName(agent);
-    const labels = [
+    return [
       tab && tab !== displayName(agent) ? tab : '',
+      agentKindLabel(agent.agent),
       agent.session || '',
-    ].filter(Boolean);
-    if (agent.agent && !hasAgentLogo(agent.agent)) labels.push(agentDisplayName(agent.agent));
-    return labels.join(' · ');
+    ].filter(Boolean).join(' · ');
+  }
+
+  // In lower case, as Herdr names agents: claude, codex, opencode, pi.
+  function agentKindLabel(agent: string | undefined): string {
+    return agent ? agentDisplayName(agent).replace(/ Code$/u, '').toLowerCase() : '';
   }
 
   // Home-relative where the relay reported its home directory, absolute
@@ -395,6 +401,7 @@
       {@const meta = agentMeta(agent, compact)}
       {@const age = relativeAge(agent)}
       {@const agentPath = compact ? relayPath(agent.relay_id, String(agent.cwd || '')) : ''}
+      {@const title = compact ? tabName(agent) || displayName(agent) : displayName(agent)}
       {@const inventoryReady = !connections.has(agent.relay_id) || connections.get(agent.relay_id)?.inventory.state === 'ready'}
       <article class:blocked class:compact-agent-card={compact} class:stale={!inventoryReady} class="agent-card">
         <button
@@ -409,24 +416,20 @@
           onkeydown={reorderWorkspace ? (event) => handleTabOrderKey(event, reorderWorkspace, reorderTabId ?? '') : undefined}
           onclick={() => onopen(agent)}
         >
-          <span class="agent-identity">
-            <AgentLogo agent={agent.agent} />
-            <span class={`status-dot status-${tone}`} aria-hidden="true"></span>
-          </span>
+          <span class={`status-dot status-${tone} agent-dot`} aria-hidden="true"></span>
           <span class="agent-copy">
             <span class="agent-title-row">
-              {#if agentPath}
-                <!-- Inside a workspace card the computer is named once, on the
-                     card, so the row spends its width on the directory. -->
-                <span class="agent-path">{@render folderIcon()}<span>{agentPath}</span></span>
-              {:else}
-                <span class="agent-project">{displayName(agent)}{#if !compact} <span class="host-badge">@{hostLabel(agent)}</span>{/if}</span>
-              {/if}
+              <!-- Inside a workspace card the computer is named once, on the
+                   card, so a row names its tab and spends the second line on
+                   the directory. -->
+              <span class="agent-project">{title}{#if !compact} <span class="host-badge">@{hostLabel(agent)}</span>{/if}</span>
               {#if compact && age}
                 <time class="agent-age" datetime={new Date(agentLastActiveAt(agent)).toISOString()} title={new Date(agentLastActiveAt(agent)).toLocaleString()}>{age}</time>
               {/if}
             </span>
-            {#if meta}<span class="agent-meta">{meta}</span>{/if}
+            {#if agentPath || meta}
+              <span class="agent-meta">{#if agentPath}<span class="agent-path">{agentPath}</span>{#if meta}<span class="meta-separator">·</span>{/if}{/if}{meta}</span>
+            {/if}
             {#if blocked || needsInspection}
               <span class="prompt-preview" class:prompt-full={interaction && quickQuestion(interaction)}>{interaction?.question || approvalPromptPreview(agent)}</span>
             {/if}
@@ -478,9 +481,6 @@
         aria-label={`${tab.label} tab`}
         style:transform={tabDrag.shift(workspace.key, tab.id) || undefined}
       >
-        <header class="workspace-tab-header">
-          <h3>{tab.label}</h3>
-        </header>
         {@render agentGrid(
           tab.agents,
           true,

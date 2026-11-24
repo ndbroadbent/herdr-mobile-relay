@@ -72,7 +72,7 @@ describe('adopted navigation and terminal controls', () => {
 
     await user.click(summary!);
     expect(workspace?.open).toBe(true);
-    expect(workspace?.querySelector('.workspace-tab h3')?.textContent).toBe('Review');
+    expect(workspace?.querySelector('.workspace-tab .agent-project')?.textContent).toBe('Review');
     expect(workspace?.querySelector('.agent-meta')?.textContent || '').not.toContain('Review');
     expect(workspace?.querySelector('.agent-age')?.textContent).toBe('2h');
     await view.rerender({
@@ -135,10 +135,11 @@ describe('adopted navigation and terminal controls', () => {
     // A working session opens its card, so the agent row is already visible.
     expect(card.querySelector('.compact-agent-card .agent-path')).toHaveTextContent('~/code/app');
     expect(card.querySelector('.compact-agent-card .host-badge')).toBeNull();
-    // An agent that reports no directory keeps its name, still without the
-    // computer its card already names.
+    // Rows in a card are named after their tab, without the computer the card
+    // already names, whether or not the agent reports a directory.
     const nameOnly = card.querySelector('.workspace-tab[aria-label="No directory tab"] .agent-project')!;
-    expect(nameOnly).toHaveTextContent('mobile');
+    expect(nameOnly).toHaveTextContent('No directory');
+    expect(card.querySelector('.workspace-tab[aria-label="No directory tab"] .agent-path')).toBeNull();
     expect(nameOnly.querySelector('.host-badge')).toBeNull();
     // The computer stays in the accessible name even where the row drops it.
     expect(screen.getAllByRole('button', { name: 'Open mobile on Laptop' })).toHaveLength(2);

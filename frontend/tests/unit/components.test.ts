@@ -894,11 +894,11 @@ describe('accessible Svelte interactions', () => {
     const working = screen.getByRole('heading', { name: 'Working' }).closest('section')!;
     const workspaces = screen.getByRole('heading', { name: 'Idle' }).closest('section')!;
     expect(within(working).getAllByText('relay', { selector: 'summary strong' })).toHaveLength(1);
-    expect(within(working).getByRole('heading', { name: 'my-tab' })).toBeInTheDocument();
-    expect(within(working).getByRole('heading', { name: 'review' })).toBeInTheDocument();
-    expect(within(working).getByText('my-session')).toBeInTheDocument();
+    expect(within(working).getByText('my-tab', { selector: '.agent-project' })).toBeInTheDocument();
+    expect(within(working).getByText('review', { selector: '.agent-project' })).toBeInTheDocument();
+    expect(within(working).getByText('codex · my-session', { selector: '.agent-meta' })).toBeInTheDocument();
     expect(within(workspaces).getByText('docs', { selector: 'summary strong' })).toBeInTheDocument();
-    expect(container.querySelectorAll('.agent-logo')).toHaveLength(3);
+    expect(container.querySelectorAll('.agent-dot')).toHaveLength(3);
     setHomeLayout('mixed');
   });
 
@@ -922,43 +922,42 @@ describe('accessible Svelte interactions', () => {
     const reorder = vi.spyOn(relayStore, 'reorderTab').mockResolvedValue({
       type: 'command_result', request_id: 'move-1', ok: true,
     });
-    render(AgentList, {
+    const { container } = render(AgentList, {
       agents: [second, first], relays: [], connections,
       responding: new Set<string>(), onopen: vi.fn(),
     });
-    const headings = screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent);
-    expect(headings).toEqual(['First', 'Second']);
+    const tabNames = () => [...container.querySelectorAll('.workspace-tab .agent-project')].map((name) => name.textContent);
+    expect(tabNames()).toEqual(['First', 'Second']);
     const cards = screen.getAllByRole('button', { name: 'Open relay on Fedora' });
     await fireEvent.keyDown(cards[0], { key: 'ArrowDown', altKey: true });
     expect(reorder).toHaveBeenCalledWith(first, 2);
     // The new arrangement shows immediately, before the relay confirms.
-    expect(screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent))
-      .toEqual(['Second', 'First']);
+    expect(tabNames()).toEqual(['Second', 'First']);
     await fireEvent.keyDown(cards[0], { key: 'ArrowDown' });
     expect(reorder).toHaveBeenCalledTimes(1);
     reorder.mockRestore();
   });
 
-  it('uses the logo instead of an agent text suffix when card metadata is empty', () => {
+  it('names the agent as text on the second line instead of a logo', () => {
     const plain: Agent = {
       relay_id: 'fedora', relay_label: 'Fedora', raw_pane_id: 'w2:p2', pane_id: 'fedora::w2:p2',
       project: 'relay', agent: 'codex', status: 'working',
     };
     const { container } = render(AgentList, { agents: [plain], relays: [], responding: new Set<string>(), onopen: vi.fn() });
-    expect(container.querySelector('.agent-meta')).not.toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'Codex' })).toBeInTheDocument();
-    expect(screen.queryByText('codex')).not.toBeInTheDocument();
+    expect(container.querySelector('.agent-meta')).toHaveTextContent('codex');
+    expect(container.querySelector('.agent-logo')).not.toBeInTheDocument();
+    expect(container.querySelector('.agent-dot')).toBeInTheDocument();
   });
 
-  it('maps supported agent aliases to logos and labels custom fallbacks', () => {
+  it('names supported agent aliases in lower case and keeps custom names', () => {
     const identities = [
-      ['claude-code', 'Claude Code'],
-      ['codex', 'Codex'],
-      ['open_code', 'OpenCode'],
-      ['pi-coding-agent', 'Pi'],
-      ['oh my pi', 'Oh My Pi'],
-      ['kimi-code', 'Kimi'],
-      ['qodercli', 'Qoder'],
+      ['claude-code', 'claude'],
+      ['codex', 'codex'],
+      ['open_code', 'opencode'],
+      ['pi-coding-agent', 'pi'],
+      ['oh my pi', 'oh my pi'],
+      ['kimi-code', 'kimi'],
+      ['qodercli', 'qoder'],
       ['custom-agent', 'custom-agent'],
     ] as const;
     const agents: Agent[] = identities.map(([agent], index) => ({
@@ -971,12 +970,8 @@ describe('accessible Svelte interactions', () => {
       status: 'working',
     }));
     const { container } = render(AgentList, { agents, relays: [], responding: new Set<string>(), onopen: vi.fn() });
-    for (const [, label] of identities) {
-      expect(screen.getByRole('img', { name: label })).toBeInTheDocument();
-    }
-    expect(container.querySelectorAll('.agent-logo')).toHaveLength(identities.length);
-    expect(container.querySelectorAll('.agent-meta')).toHaveLength(1);
-    expect(container.querySelector('.agent-meta')).toHaveTextContent('custom-agent');
+    const labels = [...container.querySelectorAll('.agent-meta')].map((element) => element.textContent?.trim());
+    expect(labels.sort()).toEqual(identities.map(([, label]) => label).sort());
   });
 
   it('names Devin panes without a dedicated logo', () => {
@@ -990,10 +985,8 @@ describe('accessible Svelte interactions', () => {
       status: 'working',
     }));
     const { container } = render(AgentList, { agents, relays: [], responding: new Set<string>(), onopen: vi.fn() });
-    expect(screen.getAllByRole('img', { name: 'Devin' })).toHaveLength(2);
-    expect(container.querySelectorAll('.agent-logo-generic')).toHaveLength(2);
     const meta = [...container.querySelectorAll('.agent-meta')].map((element) => element.textContent?.trim());
-    expect(meta).toEqual(['Devin', 'Devin']);
+    expect(meta).toEqual(['devin', 'devin']);
   });
 
   it('names Antigravity panes under every alias Herdr reports', () => {
@@ -1007,8 +1000,8 @@ describe('accessible Svelte interactions', () => {
       status: 'idle',
     }));
     const { container } = render(AgentList, { agents, relays: [], responding: new Set<string>(), onopen: vi.fn() });
-    expect(screen.getAllByRole('img', { name: 'Antigravity' })).toHaveLength(3);
-    expect(container.querySelectorAll('.agent-logo-agy')).toHaveLength(3);
+    const meta = [...container.querySelectorAll('.agent-meta')].map((element) => element.textContent?.trim());
+    expect(meta).toEqual(['antigravity', 'antigravity', 'antigravity']);
   });
 
   it('keeps a structured answer local until Submit', async () => {

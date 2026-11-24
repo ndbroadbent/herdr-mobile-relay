@@ -21,6 +21,11 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The home list shows each session as one row: a larger status dot, the tab
+  name, and a muted line with the directory, the agent (as text, such as
+  `claude`) and the session title. Tabs no longer get their own heading, and
+  rows inside a workspace read as one table, taller and in larger text on a
+  phone.
 - An approval or question alert can reach a previously unreachable phone for
   up to 24 hours, depending on the push provider. An answered or replaced
   request can be withdrawn before the phone reconnects. With an updated app

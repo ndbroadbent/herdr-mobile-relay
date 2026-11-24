@@ -319,6 +319,32 @@ textarea { min-height: 6.5rem; resize: vertical; }
 .compact-agent-card .agent-meta { margin-top: .04rem; }
 .host-badge { color: var(--primary); font-size: .68rem; font-weight: 600; }
 .agent-meta { color: var(--muted); font-size: .7rem; margin-top: .12rem; }
+/* Home list rows: a status dot centred on the row, the title in the primary
+   text colour, and one muted line for directory, agent and session. */
+.agent-list .agent-open { align-items: center; }
+.agent-dot { height: .72rem; width: .72rem; }
+.agent-project > .host-badge { margin-inline-start: .35rem; }
+.agent-list .agent-meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.agent-meta .agent-path { display: inline; font-size: inherit; font-weight: inherit; }
+.meta-separator { margin-inline: .3em; }
+/* Inside a workspace card the rows read as one table: no gaps or per-row
+   cards, a hairline between rows. */
+.agent-list .workspace-tabs { gap: 0; padding: 0; }
+.agent-list .compact-agent-grid { gap: 0; }
+.agent-list .compact-agent-card { background: transparent; border: 0; border-radius: 0; }
+.agent-list .workspace-tab + .workspace-tab .compact-agent-card,
+.agent-list .compact-agent-card + .compact-agent-card { border-top: 1px solid var(--border); }
+.agent-list .compact-agent-card .agent-open { gap: .75rem; padding: .7rem .85rem; }
+.agent-list .compact-agent-card .agent-project { font-size: .9rem; font-weight: 600; }
+.agent-list .compact-agent-card .agent-meta { font-size: .74rem; margin-top: .14rem; }
+.agent-list .workspace-worktree-card .compact-agent-card .agent-open { padding-inline: 0; }
+@media (max-width: 679px) {
+  .agent-list .compact-agent-card .agent-open { padding: .85rem .9rem; }
+  .agent-list .compact-agent-card .agent-project { font-size: 1rem; }
+  .agent-list .compact-agent-card .agent-meta { font-size: .82rem; margin-top: .18rem; }
+  .agent-list .compact-agent-card .agent-age { font-size: .76rem; }
+  .agent-dot { height: .8rem; width: .8rem; }
+}
 .prompt-preview { color: var(--foreground); display: -webkit-box; font-family: ui-monospace, monospace; font-size: .72rem; line-height: 1.35; margin-top: .55rem; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .agent-actions, .quick-actions { display: flex; flex-wrap: wrap; gap: .42rem; padding: 0 .8rem .8rem; }
 .responding { color: var(--muted); font-size: .72rem; margin: 0; padding: 0 .8rem .8rem; }

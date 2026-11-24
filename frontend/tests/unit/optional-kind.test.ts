@@ -25,7 +25,7 @@ it('includes the unknown-kind row in an expanded synthetic workspace without Git
   await fireEvent(group, new Event('toggle'));
   await fireEvent.click(screen.getByRole('button', { name: 'Open Development on Laptop' }));
   expect(onopen).toHaveBeenCalledWith(agent);
-  expect(view.container.querySelector('.agent-logo')).toBeTruthy();
+  expect(view.container.querySelector('.agent-dot')).toBeTruthy();
 });
 
 it('keeps blank-query Jump inclusive and chooses Terminal rather than guessing native history', async () => {

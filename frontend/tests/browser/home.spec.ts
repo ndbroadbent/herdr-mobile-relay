@@ -171,7 +171,7 @@ test('groups working agents and synchronizes tab order in both directions', asyn
   const working = page.locator('section.workspace-section');
   await expect(working.getByText('mobile', { exact: true }).first()).toBeVisible();
   await expect(working.locator('summary strong')).toHaveCount(1);
-  await expect(working.locator('.workspace-tab-header h3')).toHaveText(['First', 'Second']);
+  await expect(working.locator('.workspace-tab .agent-project')).toHaveText(['First', 'Second']);
 
   // Long-press the first tab's agent card, then drag below the second tab.
   const source = working.locator('.workspace-tab').filter({ hasText: 'First' }).getByRole('button', { name: /^Open mobile/ });
@@ -199,7 +199,7 @@ test('groups working agents and synchronizes tab order in both directions', asyn
       { ...agents[1], tab_order: 1 },
     ],
   });
-  await expect(working.locator('.workspace-tab-header h3')).toHaveText(['Second', 'First']);
+  await expect(working.locator('.workspace-tab .agent-project')).toHaveText(['Second', 'First']);
 
   // The long press must not have opened the agent terminal.
   await expect(page.locator('section.workspace-section')).toBeVisible();
