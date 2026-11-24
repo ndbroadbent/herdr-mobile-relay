@@ -321,7 +321,10 @@ textarea { min-height: 6.5rem; resize: vertical; }
 .agent-meta { color: var(--muted); font-size: .7rem; margin-top: .12rem; }
 /* Home list rows: a status dot centred on the row, the title in the primary
    text colour, and one muted line for directory, agent and session. */
-.agent-list .agent-open { align-items: center; }
+/* The dot sits on the title's line: it shares the title's font size, so 1lh
+   is the title's line height and the margin centres the dot on it. */
+.agent-list .agent-open { align-items: flex-start; }
+.agent-dot { font-size: .9rem; margin-top: calc((1lh - .58rem) / 2 + 1px); }
 .agent-project > .host-badge { margin-inline-start: .35rem; }
 .agent-list .agent-meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .agent-meta .agent-path { display: inline; font-size: inherit; font-weight: inherit; }
@@ -341,6 +344,7 @@ textarea { min-height: 6.5rem; resize: vertical; }
 @media (max-width: 679px) {
   .agent-list .compact-agent-card .agent-open { padding: .85rem .9rem; }
   .agent-list .compact-agent-card .agent-project { font-size: 1rem; }
+  .agent-list .compact-agent-card .agent-dot { font-size: 1rem; }
   .agent-list .compact-agent-card .agent-meta { font-size: .82rem; margin-top: .18rem; }
   .agent-list .compact-agent-card .agent-age { font-size: .76rem; }
 }
