@@ -39,6 +39,10 @@ project follows [Semantic Versioning](https://semver.org/).
 - On macOS, the relay's LaunchAgent runs as an interactive process, so launchd
   no longer throttles it and the first inventory of a large agent history
   finishes. Run setup again to rewrite the LaunchAgent.
+- Setup no longer rolls back a healthy relay whose first inventory takes
+  longer than 15 seconds. It keeps waiting while the relay reports it is still
+  reading agent histories, for up to `HERDR_RELAY_STARTUP_SECONDS` (default
+  180).
 
 ## [0.26.1] - 2026-11-19
 

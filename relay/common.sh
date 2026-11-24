@@ -967,6 +967,31 @@ require_positive_integer() {
     esac
 }
 
+require_nonnegative_integer() {
+    case "$1" in
+        ""|*[!0-9]*)
+            echo "$2 must be a whole number." >&2
+            return 1
+            ;;
+    esac
+}
+
+# Waits for a relay that setup has just (re)started. Its first inventory reads
+# every agent's history, which takes longer than the usual health budget on a
+# machine with many long-running agents, so polls continue for up to
+# HERDR_RELAY_STARTUP_SECONDS (default 180) while the relay reports it is
+# still starting. A relay that fails or never answers is still given up on
+# after the usual 15 seconds.
+wait_for_relay_startup() {
+    local port="$1"
+    local instance="$2"
+    local seconds="${HERDR_RELAY_STARTUP_SECONDS:-180}"
+    require_positive_integer "$seconds" "HERDR_RELAY_STARTUP_SECONDS" || return 1
+    local relay_startup_attempts=0
+    [ "$seconds" -le 15 ] || relay_startup_attempts=$((seconds - 15))
+    wait_for_relay_health "$port" 15 1 "$instance"
+}
+
 wait_for_relay_health() {
     local port="${1:-$RELAY_DEFAULT_PORT}"
     local attempts="${2:-15}"
@@ -1011,15 +1036,31 @@ wait_for_relay_health() {
 
     require_positive_integer "$attempts" "Health-check attempts" || return 1
 
-    for ((attempt = 1; attempt <= attempts; attempt++)); do
-        if health="$(curl -fsS --max-time 2 "http://127.0.0.1:$port/readyz" 2>/dev/null)" &&
-           printf '%s\n' "$health" | "$binary" verify-readiness "$expected_instance" "$expected_version" "$expected_revision" "$expected_web_hash" 2>/dev/null; then
-            printf '%s\n' "$health"
-            return 0
+    # wait_for_relay_startup sets relay_startup_attempts: extra polls allowed
+    # while the expected relay answers that its first inventory is still being
+    # read. Other callers keep a strict budget.
+    local starting_attempts="${relay_startup_attempts:-0}"
+    local verdict
+    require_nonnegative_integer "$starting_attempts" "Startup health-check attempts" || return 1
+    for ((attempt = 1; ; attempt++)); do
+        verdict=1
+        # Not -f: a relay that is still starting answers 503 with the body that
+        # says so.
+        if health="$(curl -sS --max-time 2 "http://127.0.0.1:$port/readyz" 2>/dev/null)"; then
+            if printf '%s\n' "$health" | "$binary" verify-readiness "$expected_instance" "$expected_version" "$expected_revision" "$expected_web_hash" 2>/dev/null; then
+                printf '%s\n' "$health"
+                return 0
+            else
+                verdict=$?
+            fi
         fi
-        if [ "$attempt" -lt "$attempts" ]; then
-            sleep "$delay"
+        if [ "$attempt" -ge "$attempts" ]; then
+            [ "$verdict" -eq 3 ] && [ "$attempt" -lt $((attempts + starting_attempts)) ] || break
+            if [ $(((attempt - attempts) % 15)) -eq 0 ]; then
+                echo "  The relay is still reading agent histories; waiting..." >&2
+            fi
         fi
+        sleep "$delay"
     done
 
     if [ "$HERDR_RELAY_BACKEND" = hc ]; then

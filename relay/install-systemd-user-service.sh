@@ -101,7 +101,7 @@ PORT="$(env_file_value "$ENV_FILE" HERDR_RELAY_PORT)"
 PORT="${PORT:-${HERDR_RELAY_PORT:-$RELAY_DEFAULT_PORT}}"
 INSTANCE="$(env_file_value "$ENV_FILE" HERDR_RELAY_INSTANCE_ID)"
 echo "Waiting for relay health on 127.0.0.1:$PORT..."
-if ! HEALTH="$(wait_for_relay_health "$PORT" 15 1 "$INSTANCE")"; then
+if ! HEALTH="$(wait_for_relay_startup "$PORT" "$INSTANCE")"; then
     report_inventory_failure "$PORT"
     echo "Replacement service did not become ready; restoring the previous installation."
     echo "Inspect it with:"
