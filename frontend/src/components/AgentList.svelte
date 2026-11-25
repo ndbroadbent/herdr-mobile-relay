@@ -4,6 +4,7 @@
   import { onMount } from 'svelte';
   import AgentLogo, { agentDisplayName, hasAgentLogo } from '$components/AgentLogo.svelte';
   import PairDeferredRelay from '$components/PairDeferredRelay.svelte';
+  import PasteSetupLink from '$components/PasteSetupLink.svelte';
   import ScanSetupCode from '$components/ScanSetupCode.svelte';
   import Button from '$components/ui/Button.svelte';
   import {
@@ -616,6 +617,7 @@
         <li>Use each computer’s setup QR code or add the relay in Settings.</li>
       </ol>
       <div><ScanSetupCode /></div>
+      <PasteSetupLink id="home-paste-setup-link" />
     </div>
   {:else if !agents.length && startingRelays.length}
     <div class="empty-state" role="status">Loading agents…</div>

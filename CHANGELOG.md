@@ -5,6 +5,13 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Paste a setup or invitation link in Settings → Relays, or on the empty home
+  screen, to add a computer. On iPhone a link always opens in Safari, never in
+  the app saved to the Home Screen, so pasting is the way to bring a link there
+  without a camera.
+
 ## [0.27.0] - 2026-11-23
 
 ### Added

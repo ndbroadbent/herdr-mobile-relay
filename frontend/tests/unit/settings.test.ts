@@ -35,11 +35,13 @@ vi.mock('$lib/transports', async (importOriginal) => {
 });
 
 describe('settings relay status', () => {
-  it('offers QR scanning above the manual form with and without relays', async () => {
+  it('offers QR scanning and a pasted link above the manual form with and without relays', async () => {
     render(SettingsView);
     const scan = screen.getByRole('button', { name: 'Scan QR Code' });
     expect(scan).toBeVisible();
-    expect(scan.nextElementSibling).toBe(screen.getByLabelText('Relay Name').closest('form'));
+    const paste = screen.getByLabelText('Setup or invitation link').closest('form');
+    expect(scan.nextElementSibling).toBe(paste);
+    expect(paste?.nextElementSibling).toBe(screen.getByLabelText('Relay Name').closest('form'));
     relayStore.relayConfigs.set([]);
     expect(await screen.findByText('No relays configured.')).toBeVisible();
     expect(scan).toBeVisible();
