@@ -12,6 +12,33 @@ project follows [Semantic Versioning](https://semver.org/).
   the app saved to the Home Screen, so pasting is the way to bring a link there
   without a camera.
 
+### Changed
+
+- The home list shows each session as one row: a larger status dot, the tab
+  name, and a muted line with the directory, the agent (as text, such as
+  `claude`) and the session title. Tabs no longer get their own heading, and
+  rows inside a workspace read as one table, taller and in larger text on a
+  phone.
+
+### Fixed
+
+- The Home Screen app on iPhone and iPad shows Scan QR Code again, and opens
+  setup links itself, on iOS versions that report an installed web app to the
+  page as a Safari tab.
+- On macOS, the relay's LaunchAgent runs as an interactive process, so launchd
+  no longer throttles it and the first inventory of a large agent history
+  finishes. Run setup again to rewrite the LaunchAgent.
+- Setup no longer rolls back a healthy relay whose first inventory takes
+  longer than 15 seconds. It keeps waiting while the relay reports it is still
+  reading agent histories, for up to `HERDR_RELAY_STARTUP_SECONDS` (default
+  180).
+- Tailscale setup works when the `tailscale` command is a different release
+  from the running Tailscale app or daemon. Its version warning no longer
+  breaks setup with `invalid tailscale status --json`.
+- The relay exits when it is stopped during its first inventory. A second
+  stop signal ends it at once, and otherwise it exits within 20 seconds,
+  instead of running on, busy, after its service was stopped or rolled back.
+
 ## [0.27.0] - 2026-11-23
 
 ### Added
@@ -30,11 +57,6 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- The home list shows each session as one row: a larger status dot, the tab
-  name, and a muted line with the directory, the agent (as text, such as
-  `claude`) and the session title. Tabs no longer get their own heading, and
-  rows inside a workspace read as one table, taller and in larger text on a
-  phone.
 - An approval or question alert can reach a previously unreachable phone for
   up to 24 hours, depending on the push provider. An answered or replaced
   request can be withdrawn before the phone reconnects. With an updated app
@@ -51,22 +73,6 @@ project follows [Semantic Versioning](https://semver.org/).
 
 - When the Herdr TUI is stopped, the phone now tells you to start it with
   `herdr` instead of showing a generic inventory error.
-- The Home Screen app on iPhone and iPad shows Scan QR Code again, and opens
-  setup links itself, on iOS versions that report an installed web app to the
-  page as a Safari tab.
-- On macOS, the relay's LaunchAgent runs as an interactive process, so launchd
-  no longer throttles it and the first inventory of a large agent history
-  finishes. Run setup again to rewrite the LaunchAgent.
-- Setup no longer rolls back a healthy relay whose first inventory takes
-  longer than 15 seconds. It keeps waiting while the relay reports it is still
-  reading agent histories, for up to `HERDR_RELAY_STARTUP_SECONDS` (default
-  180).
-- Tailscale setup works when the `tailscale` command is a different release
-  from the running Tailscale app or daemon. Its version warning no longer
-  breaks setup with `invalid tailscale status --json`.
-- The relay exits when it is stopped during its first inventory. A second
-  stop signal ends it at once, and otherwise it exits within 20 seconds,
-  instead of running on, busy, after its service was stopped or rolled back.
 
 ## [0.26.1] - 2026-11-19
 
