@@ -5,7 +5,7 @@
 
   // An iPhone opens every link in Safari, never in the app saved to the Home Screen, which keeps
   // its own storage. Pasting the link imports it here exactly as scanning its QR code would.
-  let { id = 'paste-setup-link' }: { id?: string } = $props();
+  let { id = 'paste-setup-link', centered = false }: { id?: string; centered?: boolean } = $props();
   let link = $state('');
   let refusal = $state('');
 
@@ -24,7 +24,7 @@
   }
 </script>
 
-<form class="paste-setup-link" onsubmit={submit}>
+<form class="paste-setup-link" class:centered onsubmit={submit}>
   <label class="field-label" for={id}>Setup or invitation link</label>
   <div class="paste-setup-row">
     <input
@@ -44,7 +44,8 @@
 </form>
 
 <style>
-  .paste-setup-link { display: grid; gap: .5rem; text-align: start; }
+  .paste-setup-link { display: grid; gap: .5rem; margin-block: 1rem 1.25rem; text-align: start; }
+  .paste-setup-link.centered { width: min(100%, 24rem); margin-inline: auto; }
   .paste-setup-row { display: flex; gap: .5rem; }
   .paste-setup-row input { flex: 1; min-width: 0; }
   .paste-setup-refusal { margin: 0; color: var(--danger); }
