@@ -617,7 +617,7 @@
         <li>Use each computer’s setup QR code or add the relay in Settings.</li>
       </ol>
       <div><ScanSetupCode /></div>
-      <PasteSetupLink id="home-paste-setup-link" />
+      <PasteSetupLink id="home-paste-setup-link" centered />
     </div>
   {:else if !agents.length && startingRelays.length}
     <div class="empty-state" role="status">Loading agents…</div>
